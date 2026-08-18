@@ -1,0 +1,195 @@
+<app-page-shell title="" subtitle="">
+
+  <a routerLink="/opportunities" class="back-link">
+    <span class="material-symbols-outlined">arrow_back</span>
+    Back to Opportunities
+  </a>
+
+  @if (isLoading) {
+    <div class="state-box">
+      <p>Loading opportunity...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="state-box error">
+      <p>{{ errorMessage }}</p>
+    </div>
+  } @else if (opportunity) {
+    <div class="detail-layout">
+
+      <div class="detail-main">
+
+        <div class="detail-card-header">
+          <div>
+            <h1>{{ opportunity.title }}</h1>
+            <p class="subtitle">Volunteer opportunity details</p>
+          </div>
+          <span class="status-badge" [ngClass]="'badge-' + opportunity.status.toLowerCase()">
+            {{ statusLabel(opportunity.status) }}
+          </span>
+        </div>
+
+        <div class="banner" [class.has-image]="imageUrl()">
+          <img *ngIf="imageUrl() as url" [src]="url" [alt]="opportunity.title" />
+          <span *ngIf="!imageUrl()" class="material-symbols-outlined">volunteer_activism</span>
+        </div>
+
+        <div class="section">
+          <h2>Description</h2>
+          <p>{{ opportunity.description }}</p>
+        </div>
+
+        <div class="section" *ngIf="opportunity.requiredSkills?.length">
+          <h2>Required Skills</h2>
+          <div class="skill-tags">
+            <span class="skill-tag" *ngFor="let skill of opportunity.requiredSkills">{{ skill }}</span>
+          </div>
+        </div>
+
+        <div class="section" *ngIf="canManage">
+          <h2>Applicants</h2>
+
+          <div *ngIf="isLoadingApplicants" class="applicants-empty">Loading applicants...</div>
+          <div *ngIf="applicantsError" class="applicants-error">{{ applicantsError }}</div>
+
+          <div *ngIf="!isLoadingApplicants && !applicants.length" class="applicants-empty">
+            No one has applied to this opportunity yet.
+          </div>
+
+          <div class="applicant-row" *ngFor="let applicant of applicants">
+            <div class="applicant-info">
+              <span class="applicant-name">{{ applicant.volunteer?.name || 'Unknown volunteer' }}</span>
+              <span class="applicant-email">{{ applicant.volunteer?.email }}</span>
+            </div>
+
+            <span class="applicant-status" [ngClass]="'status-' + applicant.status.toLowerCase()">
+              {{ applicant.status }}
+            </span>
+
+            <div class="applicant-actions" *ngIf="applicant.status === 'PENDING' || applicant.status === 'REJECTED'">
+              <button
+                class="btn-accept"
+                [disabled]="reviewingApplicantId === applicant._id"
+                (click)="reviewApplication(applicant._id, 'ACCEPTED')">
+                Accept
+              </button>
+              <button
+                class="btn-reject"
+                *ngIf="applicant.status === 'PENDING'"
+                [disabled]="reviewingApplicantId === applicant._id"
+                (click)="reviewApplication(applicant._id, 'REJECTED')">
+                Reject
+              </button>
+            </div>
+
+            <div class="applicant-actions" *ngIf="applicant.status === 'ACCEPTED'">
+              <button
+                class="btn-reject"
+                [disabled]="reviewingApplicantId === applicant._id"
+                (click)="reviewApplication(applicant._id, 'REJECTED')">
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="detail-side">
+
+        <h3>Opportunity Details</h3>
+
+        <div class="detail-row">
+          <span class="material-symbols-outlined">schedule</span>
+          <div>
+            <span class="label">Duration</span>
+            <span class="value">{{ opportunity.duration.value }} {{ opportunity.duration.unit }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="material-symbols-outlined">location_on</span>
+          <div>
+            <span class="label">Location</span>
+            <span class="value">{{ opportunity.location.city }}, {{ opportunity.location.state }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="opportunity.applicationDeadline">
+          <span class="material-symbols-outlined">event</span>
+          <div>
+            <span class="label">Application Deadline</span>
+            <span class="value">{{ opportunity.applicationDeadline | date: 'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="opportunity.maxVolunteers">
+          <span class="material-symbols-outlined">groups</span>
+          <div>
+            <span class="label">Max Volunteers</span>
+            <span class="value">{{ opportunity.maxVolunteers }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="material-symbols-outlined">person</span>
+          <div>
+            <span class="label">Posted by</span>
+            <span class="value">{{ ngoDisplayName() }}</span>
+          </div>
+        </div>
+
+        <div class="side-actions" *ngIf="canManage">
+          <button class="btn-outline" (click)="editOpportunity()">
+            <span class="material-symbols-outlined">edit</span>
+            Edit
+          </button>
+          <button class="btn-danger" (click)="openDeleteConfirm()">
+            <span class="material-symbols-outlined">delete</span>
+            Delete
+          </button>
+        </div>
+
+        <div class="side-actions volunteer-actions" *ngIf="isVolunteer">
+          <button
+            *ngIf="!hasApplied"
+            class="btn-primary full-width"
+            [disabled]="isJoining || opportunity.status !== 'OPEN'"
+            (click)="joinOpportunity()">
+            <span class="material-symbols-outlined">volunteer_activism</span>
+            {{ isJoining ? 'Joining...' : 'Join Opportunity' }}
+          </button>
+          <button
+            *ngIf="hasApplied"
+            class="btn-outline full-width"
+            [disabled]="isJoining"
+            (click)="withdrawFromOpportunity()">
+            <span class="material-symbols-outlined">cancel</span>
+            {{ isJoining ? 'Withdrawing...' : 'Withdraw Application' }}
+          </button>
+          <p class="join-status" *ngIf="hasApplied">
+            You've applied — status: {{ statusLabel(applicationStatus || undefined) }}
+          </p>
+          <small class="error" *ngIf="joinMessage">{{ joinMessage }}</small>
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+  @if (showDeleteConfirm) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <h3>Are you sure?</h3>
+        <p>This action cannot be undone. This will permanently delete the opportunity and remove all associated applications.</p>
+        <div class="modal-actions">
+          <button class="btn-outline" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
+          <button class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+            {{ isDeleting ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</app-page-shell>

@@ -1,0 +1,193 @@
+<app-page-shell
+  title="Pickups"
+  subtitle="Accept waste collection requests from volunteers and track your pickups">
+
+  <div class="tab-navigation">
+    <button
+      [class.active]="activeTab === 'available'"
+      (click)="setActiveTab('available')">
+      All Pickups
+    </button>
+    <button
+      [class.active]="activeTab === 'accepted'"
+      (click)="setActiveTab('accepted')">
+      Your Pickups
+    </button>
+  </div>
+
+  @if (activeTab === 'available') {
+    <div class="fade-in">
+      <div class="form-card">
+
+        <div class="form-header">
+          <h2>All Pickups</h2>
+          <p>Pickups near you appear first, sorted from closest to farthest</p>
+        </div>
+
+        @if (isLoadingAvailable) {
+          <div class="state-box">
+            <p>Loading available pickups...</p>
+          </div>
+        } @else if (availableError) {
+          <div class="state-box error">
+            <p>{{ availableError }}</p>
+          </div>
+        } @else if (availablePickups.length === 0) {
+          <div class="state-box">
+            <p>There are no pickups waiting to be accepted right now.</p>
+          </div>
+        } @else {
+          <div class="pickup-list">
+            @for (pickup of availablePickups; track pickup._id) {
+              <div class="pickup-item">
+
+                <div class="pickup-main">
+                  <div class="pickup-top">
+                    <span class="pickup-date">
+                      <span class="material-symbols-outlined">calendar_today</span>
+                      {{ formatDate(pickup.pickupDate) }}
+                    </span>
+                    @if (pickup.sameCity) {
+                      <span class="status-badge badge-progress">Same City</span>
+                    } @else {
+                      <span class="status-badge badge-pending">{{ pickup.distanceKm }} km away</span>
+                    }
+                  </div>
+
+                  <div class="pickup-address">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ pickup.address }}, {{ pickup.city }}
+                  </div>
+
+                  <div class="pickup-meta">
+                    <span>
+                      <span class="material-symbols-outlined">person</span>
+                      {{ volunteerName(pickup) }}
+                    </span>
+                    <span>
+                      <span class="material-symbols-outlined">schedule</span>
+                      {{ timeSlotLabel(pickup.timeSlot) }}
+                    </span>
+                  </div>
+
+                  <div class="waste-tags">
+                    @for (type of pickup.wasteTypes; track type) {
+                      <span class="waste-tag">{{ wasteTypeLabel(type) }}</span>
+                    }
+                  </div>
+
+                  @if (pickup.notes) {
+                    <p class="pickup-notes">{{ pickup.notes }}</p>
+                  }
+                </div>
+
+                <div class="pickup-action">
+                  <button
+                    class="btn-primary"
+                    [disabled]="actioningId === pickup._id"
+                    (click)="acceptPickup(pickup)">
+                    {{ actioningId === pickup._id ? 'Accepting...' : 'Accept' }}
+                  </button>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+  @if (activeTab === 'accepted') {
+    <div class="fade-in">
+      <div class="form-card">
+
+        <div class="form-header">
+          <h2>Your Pickups</h2>
+          <p>Pickups you've accepted, in progress, or completed</p>
+        </div>
+
+        @if (isLoadingAccepted) {
+          <div class="state-box">
+            <p>Loading your pickups...</p>
+          </div>
+        } @else if (acceptedError) {
+          <div class="state-box error">
+            <p>{{ acceptedError }}</p>
+          </div>
+        } @else if (acceptedPickups.length === 0) {
+          <div class="state-box">
+            <p>You haven't accepted any pickups yet.</p>
+            <button class="btn-primary" (click)="setActiveTab('available')">Browse available pickups</button>
+          </div>
+        } @else {
+          <div class="pickup-list">
+            @for (pickup of acceptedPickups; track pickup._id) {
+              <div class="pickup-item">
+
+                <div class="pickup-main">
+                  <div class="pickup-top">
+                    <span class="pickup-date">
+                      <span class="material-symbols-outlined">calendar_today</span>
+                      {{ formatDate(pickup.pickupDate) }}
+                    </span>
+                    <span class="status-badge" [ngClass]="statusClass(pickup.status)">
+                      {{ statusLabel(pickup.status) }}
+                    </span>
+                  </div>
+
+                  <div class="pickup-address">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ pickup.address }}, {{ pickup.city }}
+                  </div>
+
+                  <div class="pickup-meta">
+                    <span>
+                      <span class="material-symbols-outlined">person</span>
+                      {{ volunteerName(pickup) }}
+                    </span>
+                    <span>
+                      <span class="material-symbols-outlined">schedule</span>
+                      {{ timeSlotLabel(pickup.timeSlot) }}
+                    </span>
+                  </div>
+
+                  <div class="waste-tags">
+                    @for (type of pickup.wasteTypes; track type) {
+                      <span class="waste-tag">{{ wasteTypeLabel(type) }}</span>
+                    }
+                  </div>
+
+                  @if (pickup.notes) {
+                    <p class="pickup-notes">{{ pickup.notes }}</p>
+                  }
+                </div>
+
+                @if (pickup.status === 'IN_PROGRESS') {
+                  <div class="pickup-action pickup-action-group">
+                    <button
+                      class="btn-primary"
+                      [disabled]="actioningId === pickup._id"
+                      (click)="completePickup(pickup)">
+                      {{ actioningId === pickup._id ? 'Saving...' : 'Mark as Complete' }}
+                    </button>
+                    <button
+                      class="btn-cancel"
+                      [disabled]="actioningId === pickup._id"
+                      (click)="declinePickup(pickup)">
+                      Decline
+                    </button>
+                  </div>
+                }
+
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+</app-page-shell>

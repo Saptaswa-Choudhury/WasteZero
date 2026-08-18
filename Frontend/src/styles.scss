@@ -1,0 +1,60 @@
+/* src/styles.scss */
+:root {
+  --primary-blue: #1a73e8;
+  --text-main: #202124;
+  --text-muted: #5f6368;
+  --bg-sidebar: #ffffff;
+  --bg-main: #fafafa;
+  --border-color: #dadce0;
+  --font-family: 'Inter', sans-serif;
+
+  /* Subtle fills reused for hover states, chips, avatars, search bars, etc. */
+  --bg-subtle: #f1f3f4;
+  --bg-hover: #f8f9fa;
+  --bg-active-tint: #e8f0fe;
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+  color-scheme: light;
+}
+
+/* Dark theme overrides, toggled via the `dark-theme` class on <html>
+   (see ThemeService). Every color above is redefined here so the rest of
+   the app - which already consumes these variables - re-themes for free. */
+:root.dark-theme {
+  --primary-blue: #5b9dff;
+  --text-main: #e8eaed;
+  --text-muted: #9aa0a6;
+  --bg-sidebar: #1e2023;
+  --bg-main: #131417;
+  --border-color: #3c4043;
+
+  --bg-subtle: #2a2d31;
+  --bg-hover: #26282c;
+  --bg-active-tint: #23364f;
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,0 +1,209 @@
+<app-page-shell
+  title="Messages"
+  subtitle="Chat with volunteers, NGOs, and waste management partners">
+
+  <div class="messages-shell">
+
+    <!-- ================= LEFT: conversation / search panel ================= -->
+    <div class="conversations-panel" [class.hide-on-mobile]="showChatOnMobile">
+
+      <div class="panel-search">
+        <span class="material-symbols-outlined">search</span>
+        <input
+          type="text"
+          placeholder="Search messages..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()" />
+        @if (searchTerm) {
+          <button type="button" class="btn-clear-search" (click)="clearSearch()" aria-label="Clear search">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+
+      <div class="panel-list">
+
+        @if (isSearchMode) {
+
+          <div class="list-section-label">Start a new conversation</div>
+
+          @if (isSearchingUsers) {
+            <div class="empty-state small">
+              <p>Searching...</p>
+            </div>
+          } @else if (searchResults.length === 0) {
+            <div class="empty-state small">
+              <p>No users found</p>
+              <span>Try a different name or email</span>
+            </div>
+          } @else {
+            @for (user of searchResults; track trackUser($index, user)) {
+              <button type="button" class="conversation-row search-result" (click)="startChatWithUser(user)">
+                <div class="avatar">{{ initials(user.name) }}</div>
+                <div class="row-text">
+                  <div class="row-top">
+                    <span class="row-name">{{ user.name }}</span>
+                    <span class="role-badge">{{ user.role }}</span>
+                  </div>
+                  <p class="row-preview">{{ user.email }}</p>
+                </div>
+                <span class="material-symbols-outlined start-icon">chat_bubble_outline</span>
+              </button>
+            }
+          }
+
+        } @else {
+
+          @if (isLoadingConversations) {
+            <div class="empty-state small">
+              <p>Loading conversations...</p>
+            </div>
+          } @else if (conversations.length === 0) {
+            <div class="empty-state small">
+              <p>No conversations yet</p>
+              <span>Search a name above to message someone</span>
+            </div>
+          } @else {
+            @for (conv of conversations; track trackConversation($index, conv)) {
+              <button
+                type="button"
+                class="conversation-row"
+                [class.active]="selectedUser?._id === conv.user._id"
+                (click)="openConversation(conv.user)">
+
+                <div class="avatar-wrap">
+                  <div class="avatar">{{ initials(conv.user.name) }}</div>
+                  @if (isUserOnline(conv.user._id)) {
+                    <span class="online-dot"></span>
+                  }
+                </div>
+
+                <div class="row-text">
+                  <div class="row-top">
+                    <span class="row-name">{{ conv.user.name }}</span>
+                    <span class="row-time">{{ formatTime(conv.lastMessage.createdAt) }}</span>
+                  </div>
+                  <div class="row-bottom">
+                    <p class="row-preview">
+                      {{ conv.lastMessage.sender === currentUserId ? 'You: ' : '' }}{{ conv.lastMessage.content }}
+                    </p>
+                    @if (conv.unreadCount > 0) {
+                      <span class="unread-badge">{{ conv.unreadCount }}</span>
+                    }
+                  </div>
+                </div>
+
+              </button>
+            }
+          }
+
+        }
+
+      </div>
+
+    </div>
+
+    <!-- ================= RIGHT: active chat panel ================= -->
+    <div class="chat-panel" [class.show-on-mobile]="showChatOnMobile">
+
+      @if (!selectedUser) {
+
+        <div class="no-chat-selected">
+          <span class="material-symbols-outlined">forum</span>
+          <h3>No conversation selected</h3>
+          <p>Select a conversation from the left to start chatting</p>
+        </div>
+
+      } @else {
+
+        <div class="chat-header">
+          <button type="button" class="btn-back-mobile" (click)="backToList()" aria-label="Back to conversations">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+
+          <div class="avatar-wrap">
+            <div class="avatar">{{ initials(selectedUser.name) }}</div>
+            @if (isUserOnline(selectedUser._id)) {
+              <span class="online-dot"></span>
+            }
+          </div>
+
+          <div class="chat-header-text">
+            <span class="chat-user-name">{{ selectedUser.name }}</span>
+            <span class="chat-user-status">
+              @if (isOtherUserTyping) {
+                Typing...
+              } @else if (isUserOnline(selectedUser._id)) {
+                Online
+              } @else {
+                {{ selectedUser.role | titlecase }}
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="chat-messages" #messageList>
+
+          @if (isLoadingMessages) {
+            <div class="empty-state small">
+              <p>Loading messages...</p>
+            </div>
+          } @else if (messages.length === 0) {
+            <div class="empty-state small">
+              <p>No messages yet</p>
+              <span>Say hello to {{ selectedUser.name }}</span>
+            </div>
+          } @else {
+            @for (msg of messages; track trackMessage($index, msg)) {
+              <div class="message-row" [class.mine]="isMine(msg)">
+                <div class="message-bubble">
+                  <p>{{ msg.content }}</p>
+                  <span class="message-time">
+                    {{ formatTime(msg.createdAt) }}
+                    @if (isMine(msg)) {
+                      <span class="material-symbols-outlined read-icon" [class.read]="msg.isRead">
+                        {{ msg.isRead ? 'done_all' : 'done' }}
+                      </span>
+                    }
+                  </span>
+                </div>
+              </div>
+            }
+
+            @if (isOtherUserTyping) {
+              <div class="message-row">
+                <div class="message-bubble typing-bubble">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+            }
+          }
+
+        </div>
+
+        <div class="chat-input-bar">
+          <input
+            type="text"
+            placeholder="Type a message..."
+            [(ngModel)]="messageInput"
+            (ngModelChange)="onInputChange()"
+            (keydown.enter)="sendMessage()" />
+          <button
+            type="button"
+            class="btn-send"
+            [disabled]="!messageInput.trim()"
+            (click)="sendMessage()"
+            aria-label="Send message">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+</app-page-shell>

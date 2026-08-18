@@ -1,0 +1,235 @@
+<app-page-shell
+  title="Admin Dashboard"
+  subtitle="Manage platform users, monitor activity, and generate reports">
+
+  @if (isLoadingStats) {
+    <div class="state-box">
+      <p>Loading admin stats...</p>
+    </div>
+  } @else if (statsError) {
+    <div class="state-box error">
+      <p>{{ statsError }}</p>
+    </div>
+  } @else if (stats) {
+    <div class="stat-grid">
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Total Users</span>
+          <span class="stat-icon icon-blue"><span class="material-symbols-outlined">group</span></span>
+        </div>
+        <div class="stat-value">{{ stats.totalUsers }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Completed Pickups</span>
+          <span class="stat-icon icon-green"><span class="material-symbols-outlined">check_circle</span></span>
+        </div>
+        <div class="stat-value">{{ stats.completedPickups }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Pending Pickups</span>
+          <span class="stat-icon icon-yellow"><span class="material-symbols-outlined">pending_actions</span></span>
+        </div>
+        <div class="stat-value">{{ stats.pendingPickups }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Active Opportunities</span>
+          <span class="stat-icon icon-purple"><span class="material-symbols-outlined">description</span></span>
+        </div>
+        <div class="stat-value">{{ stats.activeOpportunities }}</div>
+      </div>
+
+    </div>
+  }
+
+  <div class="panel-card">
+    <div class="panel-header">
+      <h2>Generate Reports</h2>
+      <p>Download platform statistics and activity reports</p>
+    </div>
+
+    <div class="reports-row">
+      <button class="btn-outline" [disabled]="!!downloadingReport" (click)="downloadReport('users')">
+        <span class="material-symbols-outlined">group</span>
+        {{ downloadingReport === 'users' ? 'Preparing...' : 'Users Report' }}
+      </button>
+      <button class="btn-outline" [disabled]="!!downloadingReport" (click)="downloadReport('pickups')">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ downloadingReport === 'pickups' ? 'Preparing...' : 'Pickups Report' }}
+      </button>
+      <button class="btn-outline" [disabled]="!!downloadingReport" (click)="downloadReport('opportunities')">
+        <span class="material-symbols-outlined">description</span>
+        {{ downloadingReport === 'opportunities' ? 'Preparing...' : 'Opportunities Report' }}
+      </button>
+      <button class="btn-outline" [disabled]="!!downloadingReport" (click)="downloadReport('full')">
+        <span class="material-symbols-outlined">download</span>
+        {{ downloadingReport === 'full' ? 'Preparing...' : 'Full Activity Report' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-navigation">
+    <button [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">Manage Users</button>
+    <button [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">Admin Logs</button>
+  </div>
+
+  @if (activeTab === 'users') {
+    <div class="panel-card fade-in">
+      <div class="panel-header">
+        <h2>Users</h2>
+        <p>Manage user accounts and permissions</p>
+      </div>
+
+      <div class="filters-row">
+        <div class="search-input">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            placeholder="Search users..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()" />
+        </div>
+
+        <div class="status-select">
+          <span class="material-symbols-outlined">filter_list</span>
+          <select [(ngModel)]="roleFilter" (change)="onRoleFilterChange()">
+            <option value="">All Roles</option>
+            <option value="volunteer">Volunteer</option>
+            <option value="ngo">NGO</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      @if (isLoadingUsers) {
+        <div class="empty-row"><p>Loading users...</p></div>
+      } @else if (usersError) {
+        <div class="empty-row error"><p>{{ usersError }}</p></div>
+      } @else if (users.length === 0) {
+        <div class="empty-row"><p>No users found matching your criteria.</p></div>
+      } @else {
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users; track user._id) {
+                <tr>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar">{{ user.name.charAt(0) }}</div>
+                      {{ user.name }}
+                    </div>
+                  </td>
+                  <td>{{ user.email }}</td>
+                  <td><span class="role-badge">{{ roleLabel(user.role) }}</span></td>
+                  <td>
+                    <span class="status-badge" [ngClass]="user.isSuspended ? 'badge-suspended' : 'badge-active'">
+                      {{ user.isSuspended ? 'Suspended' : 'Active' }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(user.createdAt) }}</td>
+                  <td>
+                    @if (user.role !== 'admin') {
+                      <button
+                        class="btn-action"
+                        [ngClass]="user.isSuspended ? 'btn-reinstate' : 'btn-suspend'"
+                        (click)="openSuspendConfirm(user)">
+                        {{ user.isSuspended ? 'Reinstate' : 'Suspend' }}
+                      </button>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  @if (activeTab === 'logs') {
+    <div class="panel-card fade-in">
+      <div class="panel-header">
+        <h2>Admin Logs</h2>
+        <p>A record of moderation actions taken on the platform</p>
+      </div>
+
+      @if (isLoadingLogs) {
+        <div class="empty-row"><p>Loading admin logs...</p></div>
+      } @else if (logsError) {
+        <div class="empty-row error"><p>{{ logsError }}</p></div>
+      } @else if (logs.length === 0) {
+        <div class="empty-row"><p>No admin actions have been logged yet.</p></div>
+      } @else {
+        <div class="log-list">
+          @for (log of logs; track log._id) {
+            <div class="log-row">
+              <div class="log-icon">
+                <span class="material-symbols-outlined">history</span>
+              </div>
+              <div class="log-text">
+                <span class="log-summary">{{ logSummary(log) }}</span>
+                <span class="log-meta">by {{ log.admin?.name || 'Unknown admin' }} &middot; {{ formatDateTime(log.createdAt) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (userPendingAction) {
+    <div class="modal-overlay" (click)="cancelSuspendConfirm()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <h3>{{ userPendingAction.isSuspended ? 'Reinstate this user?' : 'Suspend this user?' }}</h3>
+        <p>
+          @if (userPendingAction.isSuspended) {
+            {{ userPendingAction.name }} will regain access and be able to log in again.
+          } @else {
+            {{ userPendingAction.name }} will be blocked from logging in until reinstated.
+          }
+        </p>
+
+        @if (!userPendingAction.isSuspended) {
+          <div class="form-group">
+            <label>Reason (optional)</label>
+            <textarea rows="3" placeholder="Reason for suspending this account" [(ngModel)]="suspendReason"></textarea>
+          </div>
+        }
+
+        @if (suspensionError) {
+          <div class="alert-error">{{ suspensionError }}</div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn-outline" (click)="cancelSuspendConfirm()" [disabled]="isSubmittingSuspension">Cancel</button>
+          <button
+            class="btn-danger"
+            [class.btn-primary]="userPendingAction.isSuspended"
+            (click)="confirmSuspension()"
+            [disabled]="isSubmittingSuspension">
+            {{ isSubmittingSuspension ? 'Saving...' : (userPendingAction.isSuspended ? 'Reinstate' : 'Suspend') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</app-page-shell>

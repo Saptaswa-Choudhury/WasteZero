@@ -1,0 +1,72 @@
+.city-autocomplete {
+  position: relative;
+  width: 100%;
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-main);
+    background-color: var(--bg-sidebar);
+    font-family: inherit;
+    transition: border-color 0.2s;
+
+    &::placeholder {
+      color: #9aa0a6;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .suggestions {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 220px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+
+      &:hover {
+        background-color: #f1f3f4;
+      }
+
+      .city-name {
+        color: var(--text-main);
+        font-weight: 500;
+      }
+
+      .city-state {
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+    }
+  }
+}

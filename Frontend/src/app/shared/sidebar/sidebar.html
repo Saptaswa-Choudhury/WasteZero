@@ -1,0 +1,54 @@
+<aside class="sidebar">
+  <button class="close-mobile-btn" (click)="closeSidebar()">
+  <span class="material-symbols-outlined">
+    chevron_left
+  </span>
+</button>
+
+  <div class="logo-container">
+    <span class="material-symbols-outlined logo-icon">recycling</span>
+    <h2>WasteZero</h2>
+  </div>
+
+  <div class="user-block">
+    <div class="avatar">{{ currentUser?.name?.charAt(0) || 'U' }}</div>
+    <div class="user-text">
+      <span class="user-name">{{ currentUser?.name || 'Guest User' }}</span>
+      <span class="user-role">{{ (currentUser?.role | titlecase) || 'User' }}</span>
+    </div>
+  </div>
+
+  <nav class="main-menu">
+    <h3>MAIN MENU</h3>
+    <ul>
+      <li routerLinkActive="active"><a routerLink="/dashboard"><span class="material-symbols-outlined">grid_view</span> Dashboard</a></li>
+      <li *ngIf="currentUser?.role === 'volunteer'" routerLinkActive="active"><a routerLink="/schedule"><span class="material-symbols-outlined">calendar_today</span> Schedule Pickup</a></li>
+      <li *ngIf="currentUser?.role === 'ngo'" routerLinkActive="active"><a routerLink="/pickups"><span class="material-symbols-outlined">local_shipping</span> Pickups</a></li>
+      <li routerLinkActive="active"><a routerLink="/opportunities"><span class="material-symbols-outlined">eco</span> Opportunities</a></li>
+      <li routerLinkActive="active"><a routerLink="/messages"><span class="material-symbols-outlined">chat_bubble_outline</span> Messages</a></li>
+    </ul>
+
+    <h3>SETTINGS</h3>
+    <ul>
+      <li routerLinkActive="active"><a routerLink="/profile"><span class="material-symbols-outlined">person</span> My Profile</a></li>
+      <li routerLinkActive="active"><a routerLink="/settings"><span class="material-symbols-outlined">settings</span> Settings</a></li>
+      <li routerLinkActive="active"><a routerLink="/help"><span class="material-symbols-outlined">help_outline</span> Help & Support</a></li>
+      <li *ngIf="currentUser?.role === 'admin'" routerLinkActive="active"><a routerLink="/admin"><span class="material-symbols-outlined">admin_panel_settings</span> Admin Panel</a></li>
+    </ul>
+  </nav>
+
+  <div class="theme-toggle-container">
+    <button
+      type="button"
+      class="theme-toggle-btn"
+      (click)="toggleTheme()"
+      [attr.aria-pressed]="isDarkMode()"
+      aria-label="Toggle dark mode">
+      <span class="material-symbols-outlined">{{ isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
+      <span class="toggle-label">{{ isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
+      <span class="toggle-switch" [class.on]="isDarkMode()">
+        <span class="toggle-knob"></span>
+      </span>
+    </button>
+  </div>
+</aside>

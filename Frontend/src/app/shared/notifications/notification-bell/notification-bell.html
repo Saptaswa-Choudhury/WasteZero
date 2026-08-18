@@ -1,0 +1,55 @@
+<div class="notification-bell">
+
+  <button class="bell-btn" (click)="toggleDropdown()" aria-label="Notifications">
+    <span class="material-symbols-outlined">notifications</span>
+    <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+  </button>
+
+  <div class="notification-panel" [class.open]="isOpen">
+
+    <div class="panel-header">
+      <h3>Notifications</h3>
+      <button class="mark-all-btn" *ngIf="unreadCount > 0" (click)="markAllAsRead($event)">
+        Mark all as read
+      </button>
+    </div>
+
+    <div class="panel-body">
+
+      <div class="panel-loading" *ngIf="isLoading">
+        <span class="material-symbols-outlined spin">progress_activity</span>
+        Loading...
+      </div>
+
+      <div class="panel-empty" *ngIf="!isLoading && notifications.length === 0">
+        <span class="material-symbols-outlined">notifications_off</span>
+        <p>You're all caught up</p>
+      </div>
+
+      <ul class="notification-list" *ngIf="!isLoading && notifications.length > 0">
+        <li
+          *ngFor="let notification of notifications; trackBy: trackNotification"
+          class="notification-item"
+          [class.unread]="!notification.isRead"
+          (click)="onNotificationClick(notification)">
+
+          <div class="item-icon" [class.message]="notification.type === 'MESSAGE'" [class.opportunity]="notification.type === 'OPPORTUNITY'">
+            <span class="material-symbols-outlined">{{ iconFor(notification) }}</span>
+          </div>
+
+          <div class="item-text">
+            <p class="item-title">{{ notification.title }}</p>
+            <p class="item-message" *ngIf="notification.message">{{ notification.message }}</p>
+            <span class="item-time">{{ timeAgo(notification.createdAt) }}</span>
+          </div>
+
+          <span class="unread-dot" *ngIf="!notification.isRead"></span>
+
+        </li>
+      </ul>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,103 @@
+<app-page-shell
+  title="Volunteer Opportunities"
+  subtitle="Browse and join recycling and waste management initiatives">
+
+  <button header-actions *ngIf="canCreate" class="btn-primary" (click)="createOpportunity()">
+    <span class="material-symbols-outlined">add</span>
+    Create Opportunity
+  </button>
+
+  <div class="filters-row">
+
+    <div class="search-input">
+      <span class="material-symbols-outlined">search</span>
+      <input
+        type="text"
+        placeholder="Search opportunities..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()" />
+    </div>
+
+    <div class="location-input">
+      <span class="material-symbols-outlined">location_on</span>
+      <input
+        type="text"
+        placeholder="Filter by city..."
+        [(ngModel)]="locationFilter"
+        (ngModelChange)="onLocationFilterChange()" />
+      <button
+        type="button"
+        class="btn-clear-location"
+        *ngIf="locationFilter"
+        (click)="clearLocationFilter()"
+        aria-label="Clear location filter">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="status-select">
+      <span class="material-symbols-outlined">filter_list</span>
+      <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+        <option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</option>
+      </select>
+    </div>
+
+  </div>
+
+  @if (isLoading) {
+    <div class="state-box">
+      <p>Loading opportunities...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="state-box error">
+      <p>{{ errorMessage }}</p>
+    </div>
+  } @else if (opportunities.length === 0) {
+    <div class="state-box">
+      <p>No opportunities found matching your criteria.</p>
+      <span>Check back later for new opportunities.</span>
+    </div>
+  } @else {
+    <div class="opportunity-grid">
+      <div class="opportunity-card" *ngFor="let opp of opportunities" (click)="viewDetails(opp._id)">
+
+        <div class="card-banner" [class.has-image]="imageUrl(opp)">
+          <img *ngIf="imageUrl(opp) as url" [src]="url" [alt]="opp.title" />
+          <span *ngIf="!imageUrl(opp)" class="material-symbols-outlined">volunteer_activism</span>
+        </div>
+
+        <div class="card-body">
+
+          <div class="card-top">
+            <h3>{{ opp.title }}</h3>
+            <span class="status-badge" [ngClass]="statusClass(opp.status)">{{ statusLabel(opp.status) }}</span>
+          </div>
+
+          <div class="card-top" *ngIf="isOwn(opp) || opp.sameCity !== undefined">
+            <span class="status-badge badge-own" *ngIf="isOwn(opp)">Your Opportunity</span>
+            <span class="status-badge badge-progress" *ngIf="!isOwn(opp) && opp.sameCity">Same City</span>
+            <span class="status-badge badge-pending" *ngIf="!isOwn(opp) && opp.sameCity === false">{{ opp.distanceKm }} km away</span>
+          </div>
+
+          <p class="card-desc">{{ opp.description }}</p>
+
+          <div class="card-meta">
+            <span>
+              <span class="material-symbols-outlined">schedule</span>
+              {{ opp.duration.value }} {{ opp.duration.unit }}
+            </span>
+            <span>
+              <span class="material-symbols-outlined">location_on</span>
+              {{ opp.location.city }}, {{ opp.location.state }}
+            </span>
+          </div>
+
+          <button class="btn-view" (click)="viewDetails(opp._id); $event.stopPropagation()">View Details</button>
+
+        </div>
+
+      </div>
+    </div>
+  }
+
+</app-page-shell>

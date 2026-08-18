@@ -1,0 +1,131 @@
+<app-page-shell title="" subtitle="">
+
+  <a [routerLink]="isEditMode ? ['/opportunities', opportunityId] : ['/opportunities']" class="back-link">
+    <span class="material-symbols-outlined">arrow_back</span>
+    Back to Opportunities
+  </a>
+
+  <div class="form-card">
+
+    <div class="form-header">
+      <h1>{{ isEditMode ? 'Edit Opportunity' : 'Create New Opportunity' }}</h1>
+      <p>{{ isEditMode ? 'Update the details of this volunteer opportunity' : 'Post a volunteer opportunity for waste management and recycling' }}</p>
+    </div>
+
+    @if (isLoading) {
+      <div class="state-box">
+        <p>Loading opportunity...</p>
+      </div>
+    } @else {
+
+      @if (errorMessage) {
+        <div class="alert-error">{{ errorMessage }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <h2 class="section-title">Opportunity Details</h2>
+
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input id="title" type="text" formControlName="title" placeholder="E.g., Beach Cleanup Drive" />
+          <small class="error" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            Title must be between 3 and 100 characters.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" formControlName="description" rows="4" placeholder="Provide details about the volunteer opportunity"></textarea>
+          <small class="error" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+            Description must be between 10 and 2000 characters.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+          <app-city-autocomplete formControlName="city"></app-city-autocomplete>
+          <small class="error" *ngIf="form.get('city')?.invalid && form.get('city')?.touched">
+            Please select a city from the suggestions.
+          </small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="durationValue">Duration</label>
+            <input id="durationValue" type="number" min="1" formControlName="durationValue" placeholder="E.g., 2" />
+            <small class="error" *ngIf="form.get('durationValue')?.invalid && form.get('durationValue')?.touched">
+              Duration must be at least 1.
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="durationUnit">Duration Unit</label>
+            <select id="durationUnit" formControlName="durationUnit">
+              <option *ngFor="let unit of durationUnits" [value]="unit">{{ unit }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="opportunityImage">Opportunity Image</label>
+
+          <div class="image-upload">
+            <div class="image-preview" *ngIf="imagePreviewUrl">
+              <img [src]="imagePreviewUrl" alt="Opportunity image preview" />
+              <button type="button" class="btn-remove-image" (click)="removeImage()">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <label class="image-drop" [class.has-image]="imagePreviewUrl" for="opportunityImage">
+              <span class="material-symbols-outlined">add_a_photo</span>
+              {{ imagePreviewUrl ? 'Change image' : 'Upload an image' }}
+            </label>
+            <input
+              id="opportunityImage"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              (change)="onImageSelected($event)" />
+          </div>
+
+          <small>PNG, JPEG, WEBP, or GIF — up to {{ maxImageSizeMb }}MB.</small>
+          <small class="error" *ngIf="imageError">{{ imageError }}</small>
+        </div>
+
+        <div class="form-group">
+          <label for="requiredSkills">Required Skills</label>
+          <input id="requiredSkills" type="text" formControlName="requiredSkills" placeholder="E.g., Teamwork, First Aid, Environmental Knowledge" />
+          <small>Separate skills with commas.</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxVolunteers">Max Volunteers</label>
+            <input id="maxVolunteers" type="number" min="0" formControlName="maxVolunteers" placeholder="0 = unlimited" />
+          </div>
+          <div class="form-group">
+            <label for="applicationDeadline">Application Deadline (optional)</label>
+            <input id="applicationDeadline" type="date" formControlName="applicationDeadline" />
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode">
+          <label for="status">Status</label>
+          <select id="status" formControlName="status">
+            <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline" (click)="cancel()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Opportunity') }}
+          </button>
+        </div>
+
+      </form>
+    }
+
+  </div>
+
+</app-page-shell>
