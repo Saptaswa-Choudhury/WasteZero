@@ -3,6 +3,7 @@
 A full-stack platform connecting NGOs with volunteers for waste cleanup, recycling drives, and household waste pickups. NGOs post opportunities and manage pickup requests; volunteers browse and apply for opportunities, schedule pickups, and message NGOs directly — with real-time notifications and end-to-end encrypted chat.
 
 Live: wastezero-batch1.vercel.app
+
 Alternate: waste-zero-two.vercel.app
 
 ## Tech Stack
