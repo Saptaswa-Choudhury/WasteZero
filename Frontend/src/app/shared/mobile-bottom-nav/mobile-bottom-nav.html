@@ -1,0 +1,97 @@
+<nav class="mobile-bottom-nav">
+
+  <a
+    routerLink="/dashboard"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      dashboard
+    </span>
+
+    <span>Dashboard</span>
+
+  </a>
+
+  <a
+    *ngIf="currentUser?.role === 'volunteer'"
+    routerLink="/schedule"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      calendar_today
+    </span>
+
+    <span>Schedule</span>
+
+  </a>
+
+  <a
+    *ngIf="currentUser?.role === 'ngo'"
+    routerLink="/pickups"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      local_shipping
+    </span>
+
+    <span>Pickups</span>
+
+  </a>
+
+  <a
+    routerLink="/opportunities"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      eco
+    </span>
+
+    <span>Volunteer</span>
+
+  </a>
+
+  <a
+    routerLink="/messages"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      chat_bubble_outline
+    </span>
+
+    <span>Chat</span>
+
+  </a>
+
+  <a
+    *ngIf="currentUser?.role === 'admin'"
+    routerLink="/admin"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      admin_panel_settings
+    </span>
+
+    <span>Admin</span>
+
+  </a>
+
+  <a
+    routerLink="/profile"
+    routerLinkActive="active"
+    class="nav-item">
+
+    <span class="material-symbols-outlined">
+      person
+    </span>
+
+    <span>Profile</span>
+
+  </a>
+
+</nav>

@@ -1,0 +1,67 @@
+@if (isLoading) {
+  <div class="loading-state" style="padding: 2rem; text-align: center; color: #666;">
+    <p>Loading profile data...</p>
+  </div>
+} @else {
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="form-layout">
+    
+    <div class="section-header">
+      <h2>Personal Information</h2>
+      <p>Update your personal information and profile details.</p>
+    </div>
+
+    @if (successMessage) {
+      <div class="alert success" style="color: #155724; background-color: #d4edda; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+        {{ successMessage }}
+      </div>
+    }
+    @if (errorMessage) {
+      <div class="alert error" style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input id="fullName" type="text" formControlName="fullName" placeholder="Your full name">
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email">
+      <small>This is the email address used for account notifications. It cannot be changed.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="city">City</label>
+      <app-city-autocomplete formControlName="city"></app-city-autocomplete>
+      <small>{{ isNgo ? 'Required to see nearby pickups sorted by distance in the Pickups tab.' : 'Used to sort things by distance to you.' }}</small>
+    </div>
+
+    <div class="form-group">
+      <label for="skills">Skills</label>
+      <input id="skills" type="text" formControlName="skills" placeholder="Separate skills with commas">
+    </div>
+
+    <div class="form-group">
+      <label for="bio">Bio</label>
+      <textarea id="bio" formControlName="bio" rows="4" placeholder="Short biography or profile description"></textarea>
+    </div>
+
+    <div style="display: flex; gap: 15px; align-items: stretch; margin-top: 20px;">
+      
+      <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isSaving" style="margin: 0;">
+        {{ isSaving ? 'Saving Changes...' : 'Save Changes' }}
+      </button>
+
+      <button 
+        type="button" 
+        (click)="deleteAccount()"
+        style="margin: 0; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; color: #d9534f; background-color: white; border: 1px solid #d9534f; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+        Delete Account
+      </button>
+      
+    </div>
+    
+  </form>
+}

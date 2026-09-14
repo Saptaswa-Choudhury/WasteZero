@@ -1,0 +1,53 @@
+<app-page-shell title="Help & Support" subtitle="Find answers or get in touch with our team">
+
+  <div class="help-grid">
+
+    <section class="help-card faq-card">
+      <div class="card-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Quick answers to the most common questions</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let item of faqs">
+          <button type="button" class="faq-question" (click)="toggleFaq(item)" [attr.aria-expanded]="item.open">
+            <span>{{ item.question }}</span>
+            <span class="material-symbols-outlined chevron" [class.open]="item.open">expand_more</span>
+          </button>
+          <div class="faq-answer" *ngIf="item.open">
+            <p>{{ item.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="help-card contact-card">
+      <div class="card-header">
+        <h2>Contact Support</h2>
+        <p>Can't find what you're looking for? Send us a message</p>
+      </div>
+
+      <div class="quick-contact">
+        <span class="material-symbols-outlined">mail</span>
+        <a [href]="'mailto:' + supportEmail">{{ supportEmail }}</a>
+      </div>
+
+      <form (ngSubmit)="submitContactForm()">
+        <label for="subject">Subject</label>
+        <input id="subject" type="text" name="subject" [(ngModel)]="contactForm.subject" placeholder="What's this about?" required>
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" [(ngModel)]="contactForm.message" placeholder="Describe your issue or question..." required></textarea>
+
+        <button type="submit" class="btn-primary">Send Message</button>
+
+        <div class="success-toast" *ngIf="submitted">
+          <span class="material-symbols-outlined">check_circle</span>
+          Opening your email client to send this message…
+        </div>
+      </form>
+    </section>
+
+  </div>
+
+</app-page-shell>

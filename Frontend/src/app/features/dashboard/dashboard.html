@@ -1,0 +1,204 @@
+<app-page-shell title="Dashboard" [subtitle]="welcomeSubtitle">
+
+  @if (isLoadingStats) {
+    <div class="state-box">
+      <p>Loading your dashboard...</p>
+    </div>
+  } @else if (statsError) {
+    <div class="state-box error">
+      <p>{{ statsError }}</p>
+    </div>
+  } @else if (stats) {
+
+    <div class="stat-grid">
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Total Pickups</span>
+          <span class="stat-icon icon-blue"><span class="material-symbols-outlined">local_shipping</span></span>
+        </div>
+        <div class="stat-value">{{ stats.totalPickups }}</div>
+        <div class="stat-trend" [ngClass]="trendClass(stats.trends.totalPickups)">
+          <span class="material-symbols-outlined">{{ trendIcon(stats.trends.totalPickups) }}</span>
+          {{ stats.trends.totalPickups > 0 ? '+' : '' }}{{ stats.trends.totalPickups }}% from last month
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Recycled Items</span>
+          <span class="stat-icon icon-green"><span class="material-symbols-outlined">recycling</span></span>
+        </div>
+        <div class="stat-value">{{ stats.recycledItems }}</div>
+        <div class="stat-trend" [ngClass]="trendClass(stats.trends.recycledItems)">
+          <span class="material-symbols-outlined">{{ trendIcon(stats.trends.recycledItems) }}</span>
+          {{ stats.trends.recycledItems > 0 ? '+' : '' }}{{ stats.trends.recycledItems }}% from last month
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">CO2 Saved (kg)</span>
+          <span class="stat-icon icon-yellow"><span class="material-symbols-outlined">eco</span></span>
+        </div>
+        <div class="stat-value">{{ stats.co2SavedKg }}</div>
+        <div class="stat-trend" [ngClass]="trendClass(stats.trends.co2SavedKg)">
+          <span class="material-symbols-outlined">{{ trendIcon(stats.trends.co2SavedKg) }}</span>
+          {{ stats.trends.co2SavedKg > 0 ? '+' : '' }}{{ stats.trends.co2SavedKg }}% from last month
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <span class="stat-label">Volunteer Hours</span>
+          <span class="stat-icon icon-pink"><span class="material-symbols-outlined">favorite</span></span>
+        </div>
+        <div class="stat-value">{{ stats.volunteerHours }}</div>
+        <div class="stat-trend" [ngClass]="trendClass(stats.trends.volunteerHours)">
+          <span class="material-symbols-outlined">{{ trendIcon(stats.trends.volunteerHours) }}</span>
+          {{ stats.trends.volunteerHours > 0 ? '+' : '' }}{{ stats.trends.volunteerHours }}% from last month
+        </div>
+      </div>
+
+    </div>
+
+    <div class="two-col-grid">
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>Upcoming Pickups</h2>
+          <button class="link-btn" (click)="viewAllPickups()">View All</button>
+        </div>
+
+        @if (stats.upcomingPickups.length === 0) {
+          <div class="empty-row">
+            <p>No upcoming pickups scheduled.</p>
+          </div>
+        } @else {
+          <table class="pickups-table">
+            <thead>
+              <tr>
+                <th>Date &amp; Time</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (pickup of stats.upcomingPickups; track pickup._id) {
+                <tr>
+                  <td>{{ formatDate(pickup.pickupDate) }}</td>
+                  <td class="truncate">{{ pickup.address }}, {{ pickup.city }}</td>
+                  <td><span class="status-badge" [ngClass]="statusClass(pickup.status)">{{ pickup.status }}</span></td>
+                  <td><button class="link-btn" (click)="viewAllPickups()">View</button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>Recycling Breakdown</h2>
+          <span class="panel-hint">{{ stats.recyclingBreakdownIsAllTime ? 'All Time' : 'This Month' }}</span>
+        </div>
+
+        @if (stats.recyclingBreakdown.length === 0) {
+          <div class="empty-row">
+            <p>No recycling data yet this month.</p>
+          </div>
+        } @else {
+          <div class="breakdown-list">
+            @for (entry of stats.recyclingBreakdown; track entry.category) {
+              <div class="breakdown-row">
+                <div class="breakdown-label">
+                  <span>{{ wasteTypeLabel(entry.category) }}</span>
+                  <span>{{ entry.percent }}%</span>
+                </div>
+                <div class="breakdown-bar">
+                  <div
+                    class="breakdown-fill"
+                    [style.width.%]="entry.percent"
+                    [style.background-color]="wasteTypeColor(entry.category)"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="total-collected">
+          <span>Total Collected</span>
+          <div class="total-value">
+            {{ stats.totalCollectedKg }} kg
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>Volunteer Opportunities</h2>
+        <button class="link-btn" (click)="viewAllOpportunities()">View All</button>
+      </div>
+
+      @if (isLoadingOpportunities) {
+        <div class="empty-row"><p>Loading opportunities...</p></div>
+      } @else if (opportunities.length === 0) {
+        <div class="empty-row"><p>No open opportunities right now. Check back later.</p></div>
+      } @else {
+        <div class="opportunity-grid">
+          @for (opp of opportunities; track opp._id) {
+            <div class="opportunity-card" (click)="viewOpportunity(opp._id)">
+              <div class="card-banner" [class.has-image]="imageUrl(opp)">
+                <img *ngIf="imageUrl(opp) as url" [src]="url" [alt]="opp.title" />
+                <span *ngIf="!imageUrl(opp)" class="material-symbols-outlined">volunteer_activism</span>
+              </div>
+              <div class="card-body">
+                <div class="card-top">
+                  <h3>{{ opp.title }}</h3>
+                  <span class="status-badge badge-open">Open</span>
+                </div>
+                <p class="card-desc">{{ opp.description }}</p>
+                <div class="card-meta">
+                  <span><span class="material-symbols-outlined">location_on</span> {{ opp.location.city }}, {{ opp.location.state }}</span>
+                  <span><span class="material-symbols-outlined">schedule</span> {{ opp.duration.value }} {{ opp.duration.unit }}</span>
+                </div>
+                <button class="btn-primary" (click)="viewOpportunity(opp._id); $event.stopPropagation()">Apply Now</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2>Recent Messages</h2>
+        <button class="link-btn" (click)="viewAllMessages()">View All</button>
+      </div>
+
+      @if (isLoadingMessages) {
+        <div class="empty-row"><p>Loading messages...</p></div>
+      } @else if (conversations.length === 0) {
+        <div class="empty-row"><p>No messages yet.</p></div>
+      } @else {
+        <div class="message-list">
+          @for (conv of conversations; track conv.user._id) {
+            <div class="message-row" (click)="viewAllMessages()">
+              <div class="avatar">{{ conversationName(conv).charAt(0) }}</div>
+              <div class="message-text">
+                <span class="message-name">{{ conversationName(conv) }}</span>
+                <span class="message-preview">{{ conv.lastMessage.content }}</span>
+              </div>
+              <span class="message-time">{{ formatDate(conv.lastMessage.createdAt) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+
+</app-page-shell>

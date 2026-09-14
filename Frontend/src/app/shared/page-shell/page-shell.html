@@ -1,0 +1,85 @@
+<div class="page-container">
+
+  <app-sidebar
+    [class.show]="isSidebarOpen"
+    (close)="closeSidebar()">
+  </app-sidebar>
+
+  <main class="content-area">
+
+    <header class="top-nav">
+
+      <button class="mobile-menu-btn" (click)="toggleSidebar()">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+
+      <div class="search-bar">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search pickups, opportunities..." />
+      </div>
+
+      <div class="top-actions">
+
+        <app-notification-bell></app-notification-bell>
+
+        <div class="user-dropdown" (click)="toggleDropdown()">
+
+          <div class="avatar-small">
+            {{ currentUser?.name?.charAt(0) || 'U' }}
+          </div>
+
+          <span class="user-name">
+            {{ currentUser?.name || 'Guest User' }}
+          </span>
+
+          <span
+            class="material-symbols-outlined dropdown-icon"
+            [style.transform]="isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'"
+            style="transition: transform 0.2s;">
+            expand_more
+          </span>
+
+          <div class="dropdown-menu" [class.open]="isDropdownOpen">
+
+            <button class="menu-item" (click)="goToProfile()">
+              <span class="material-symbols-outlined">person</span>
+              Profile
+            </button>
+
+            <hr class="menu-divider" />
+
+            <button class="menu-item logout" (click)="logout()">
+              <span class="material-symbols-outlined">logout</span>
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="page-header" *ngIf="title">
+
+      <div class="page-header-text">
+        <h1>{{ title }}</h1>
+        <p *ngIf="subtitle">{{ subtitle }}</p>
+      </div>
+
+      <div class="page-header-actions">
+        <ng-content select="[header-actions]"></ng-content>
+      </div>
+
+    </div>
+
+    <div class="page-body">
+      <ng-content></ng-content>
+    </div>
+
+  </main>
+
+  <app-mobile-bottom-nav></app-mobile-bottom-nav>
+
+</div>

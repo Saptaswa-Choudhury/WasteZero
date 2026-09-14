@@ -1,0 +1,130 @@
+<div class="page-container">
+
+  <app-sidebar
+    [class.show]="isSidebarOpen"
+    (close)="closeSidebar()">
+  </app-sidebar>
+
+  <main class="content-area">
+
+    <header class="top-nav">
+
+      <button
+        class="mobile-menu-btn"
+        (click)="toggleSidebar()">
+
+        <span class="material-symbols-outlined">
+          menu
+        </span>
+
+      </button>
+
+      <div class="search-bar">
+
+        <span class="material-symbols-outlined">
+          search
+        </span>
+
+        <input
+          type="text"
+          placeholder="Search pickups, opportunities..." />
+
+      </div>
+
+      <div class="top-actions">
+
+        <span class="material-symbols-outlined">
+          notifications
+        </span>
+
+        <div class="user-dropdown" (click)="toggleDropdown()">
+
+          <div class="avatar-small">
+            {{ currentUser?.name?.charAt(0) || 'U' }}
+          </div>
+
+          <span class="user-name">
+            {{ currentUser?.name || 'Guest User' }}
+          </span>
+
+          <span class="material-symbols-outlined dropdown-icon" [style.transform]="isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'" style="transition: transform 0.2s;">
+            expand_more
+          </span>
+
+          <div class="dropdown-menu" [class.open]="isDropdownOpen">
+            
+            <button class="menu-item" (click)="setActiveTab('profile')">
+              <span class="material-symbols-outlined">person</span>
+              Profile
+            </button>
+            
+            <hr class="menu-divider" />
+            
+            <button class="menu-item logout" (click)="logout()">
+              <span class="material-symbols-outlined">logout</span>
+              Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="profile-header">
+
+      <h1>My Profile</h1>
+
+      <p>
+        Manage your account information and settings
+      </p>
+
+      <div class="tab-navigation">
+
+        <button
+          [class.active]="activeTab === 'profile'"
+          (click)="setActiveTab('profile')">
+
+          Profile
+
+        </button>
+
+        <button
+          [class.active]="activeTab === 'password'"
+          (click)="setActiveTab('password')">
+
+          Password
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="forms-container">
+
+      @if (activeTab === 'profile') {
+        <div class="fade-in">
+          <app-personal-info
+            (infoUpdate)="onInfoHandoff($event)">
+          </app-personal-info>
+        </div>
+      }
+
+      @if (activeTab === 'password') {
+        <div class="fade-in">
+          <app-password-change
+            (passwordUpdate)="onPasswordHandoff($event)">
+          </app-password-change>
+        </div>
+      }
+
+    </div>
+
+  </main>
+
+  <app-mobile-bottom-nav></app-mobile-bottom-nav>
+
+</div>

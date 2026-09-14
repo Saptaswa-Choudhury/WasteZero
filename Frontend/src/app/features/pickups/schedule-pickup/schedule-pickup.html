@@ -1,0 +1,223 @@
+<app-page-shell
+  title="Schedule Pickup"
+  subtitle="Request waste collection and manage your pickups">
+
+  <div class="tab-navigation">
+    <button
+      [class.active]="activeTab === 'schedule'"
+      (click)="setActiveTab('schedule')">
+      Schedule New Pickup
+    </button>
+    <button
+      [class.active]="activeTab === 'history'"
+      (click)="setActiveTab('history')">
+      Pickup History
+    </button>
+  </div>
+
+  @if (activeTab === 'schedule') {
+    <div class="fade-in">
+      <div class="form-card">
+
+        <div class="form-header">
+          <h2>Request Waste Collection</h2>
+          <p>Fill in the details to schedule a pickup for your recyclable waste</p>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
+        @if (successMessage) {
+          <div class="alert-success">{{ successMessage }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          @if (currentStep === 1) {
+            <div class="step-content">
+
+              <div class="form-group">
+                <label for="address">Address</label>
+                <input
+                  id="address"
+                  type="text"
+                  formControlName="address"
+                  placeholder="Enter your street address" />
+                @if (form.get('address')?.touched && form.get('address')?.invalid) {
+                  <small class="error">Please enter a valid address (at least 5 characters).</small>
+                }
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <app-city-autocomplete formControlName="city"></app-city-autocomplete>
+                  @if (form.get('city')?.touched && form.get('city')?.invalid) {
+                    <small class="error">Please select a city from the suggestions.</small>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label for="pickupDate">Pickup Date</label>
+                  <input
+                    id="pickupDate"
+                    type="date"
+                    formControlName="pickupDate"
+                    [min]="minDate" />
+                  @if (form.get('pickupDate')?.touched && form.get('pickupDate')?.invalid) {
+                    <small class="error">Please select a pickup date.</small>
+                  }
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="timeSlot">Preferred Time Slot</label>
+                <select id="timeSlot" formControlName="timeSlot">
+                  <option value="" disabled>Select a time slot</option>
+                  @for (option of timeSlotOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (form.get('timeSlot')?.touched && form.get('timeSlot')?.invalid) {
+                  <small class="error">Please select a preferred time slot.</small>
+                }
+              </div>
+
+              <div class="form-actions single">
+                <button type="button" class="btn-primary" (click)="goToNextStep()">Next Step</button>
+              </div>
+
+            </div>
+          }
+
+          @if (currentStep === 2) {
+            <div class="step-content">
+
+              <div class="form-group">
+                <label>Waste Types</label>
+                <p class="field-hint">Select the types of waste you want to recycle</p>
+
+                <div class="checkbox-grid" formGroupName="wasteTypes">
+                  @for (option of wasteTypeOptions; track option.value) {
+                    <label class="checkbox-item">
+                      <input type="checkbox" [formControlName]="option.value" />
+                      <span>{{ option.label }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="notes">Additional Notes</label>
+                <textarea
+                  id="notes"
+                  rows="4"
+                  formControlName="notes"
+                  [attr.maxlength]="500"
+                  placeholder="Any special instructions or information about your waste"></textarea>
+                <small>Please provide any additional details that might help our pickup team.</small>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-outline" (click)="goToPreviousStep()">Previous Step</button>
+                <button type="submit" class="btn-primary" [disabled]="isSaving">
+                  {{ isSaving ? 'Scheduling...' : 'Schedule Pickup' }}
+                </button>
+              </div>
+
+            </div>
+          }
+
+        </form>
+
+      </div>
+    </div>
+  }
+
+  @if (activeTab === 'history') {
+    <div class="fade-in">
+      <div class="form-card">
+
+        <div class="form-header">
+          <h2>Your Pickup History</h2>
+          <p>View and manage all your scheduled pickups</p>
+        </div>
+
+        @if (isLoadingHistory) {
+          <div class="state-box">
+            <p>Loading your pickups...</p>
+          </div>
+        } @else if (historyError) {
+          <div class="state-box error">
+            <p>{{ historyError }}</p>
+          </div>
+        } @else if (pickups.length === 0) {
+          <div class="state-box">
+            <p>You haven't scheduled any pickups yet.</p>
+            <button class="btn-primary" (click)="goToScheduleTab()">Schedule your first pickup</button>
+          </div>
+        } @else {
+          <div class="pickup-list">
+            @for (pickup of pickups; track pickup._id) {
+              <div class="pickup-item">
+
+                <div class="pickup-main">
+                  <div class="pickup-top">
+                    <span class="pickup-date">
+                      <span class="material-symbols-outlined">calendar_today</span>
+                      {{ formatDate(pickup.pickupDate) }}
+                    </span>
+                    <span class="status-badge" [ngClass]="statusClass(pickup.status)">
+                      {{ statusLabel(pickup.status) }}
+                    </span>
+                  </div>
+
+                  <div class="pickup-address">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ pickup.address }}, {{ pickup.city }}
+                  </div>
+
+                  <div class="pickup-meta">
+                    <span>
+                      <span class="material-symbols-outlined">schedule</span>
+                      {{ timeSlotLabel(pickup.timeSlot) }}
+                    </span>
+                    @if (ngoName(pickup)) {
+                      <span>
+                        <span class="material-symbols-outlined">volunteer_activism</span>
+                        {{ pickup.status === 'COMPLETED' ? 'Completed by' : 'Accepted by' }} {{ ngoName(pickup) }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="waste-tags">
+                    @for (type of pickup.wasteTypes; track type) {
+                      <span class="waste-tag">{{ wasteTypeLabel(type) }}</span>
+                    }
+                  </div>
+
+                  @if (pickup.notes) {
+                    <p class="pickup-notes">{{ pickup.notes }}</p>
+                  }
+                </div>
+
+                <div class="pickup-action">
+                  <button
+                    class="btn-cancel"
+                    *ngIf="canCancel(pickup)"
+                    [disabled]="cancellingId === pickup._id"
+                    (click)="cancelPickup(pickup)">
+                    {{ cancellingId === pickup._id ? 'Cancelling...' : 'Cancel' }}
+                  </button>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+</app-page-shell>

@@ -1,0 +1,153 @@
+<div class="auth-page">
+  <div class="auth-container">
+    
+    <div class="branding-section">
+      <div class="logo">
+        <h1>WasteZero</h1>
+      </div>
+      <h2>Join the Recycling Revolution</h2>
+      <p>WasteZero connects volunteers, NGOs, and administrators to schedule pickups, manage recycling opportunities, and make a positive impact on our environment.</p>
+      
+      <div class="benefits">
+        <div>
+          <strong>Schedule Pickups</strong>
+          <p>Easily arrange waste collection</p>
+        </div>
+        <div>
+          <strong>Track Impact</strong>
+          <p>Monitor your environmental contribution</p>
+        </div>
+        <div>
+          <strong>Volunteer</strong>
+          <p>Join recycling initiatives</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button [class.active]="activeTab === 'login'" (click)="switchTab('login')">Login</button>
+          <button [class.active]="activeTab === 'register'" (click)="switchTab('register')">Register</button>
+        </div>
+
+        <div class="auth-content">
+          <div *ngIf="activeTab === 'login'">
+            <h3>Login to your account</h3>
+            <p class="subtitle">Enter your credentials to access your account</p>
+            <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+              
+              <label>Email</label>
+              <input type="email" formControlName="email" placeholder="Your email"
+                [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <div class="error-text" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                A valid email is required
+              </div>
+
+              <label>Password</label>
+              <input type="password" formControlName="password" placeholder="Your password"
+                [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <div class="error-text" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                Password is required
+              </div>
+
+              <button type="submit" class="btn-primary">Login</button>
+            </form>
+          </div>
+
+          <div *ngIf="activeTab === 'register'">
+            <h3>Create a new account</h3>
+            <p class="subtitle">Fill in your details to join WasteZero</p>
+            <form [formGroup]="registerForm">
+              
+              <div class="form-row">
+                <div class="half-width">
+                  <label>Full Name</label>
+                  <input type="text" formControlName="fullName" placeholder="Your full name"
+                    [class.invalid]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
+                  <div class="error-text" *ngIf="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
+                    Full name is required
+                  </div>
+                </div>
+
+                <div class="half-width">
+                  <label>Email</label>
+                  <input type="email" formControlName="email" placeholder="Your email"
+                    [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                  <div class="error-text" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                    {{ registerForm.get('email')?.errors?.['required'] ? 'Email is required' : 'Enter a valid email' }}
+                  </div>
+                </div>
+              </div>
+
+              <label>Username</label>
+              <input type="text" formControlName="username" placeholder="Choose a username"
+                [class.invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+              <div class="error-text" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+                Username is required
+              </div>
+
+              <div class="form-row">
+                <div class="half-width">
+                  <label>Password</label>
+                  <input type="password" formControlName="password" placeholder="Create a password"
+                    [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                  <div class="error-text" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                    {{ registerForm.get('password')?.errors?.['required'] ? 'Password is required' : 'Password must be at least 8 characters' }}
+                  </div>
+                </div>
+
+                <div class="half-width">
+                  <label>Confirm Password</label>
+                  <input type="password" formControlName="confirmPassword" placeholder="Confirm your password"
+                    [class.invalid]="(registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) || passwordMismatch">
+                  <div class="error-text" *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+                    Please confirm your password
+                  </div>
+                  <div class="error-text" *ngIf="passwordMismatch">
+                    Passwords do not match
+                  </div>
+                </div>
+              </div>
+
+              <label>Role</label>
+                <select formControlName="role" [class.invalid]="registerForm.get('role')?.invalid && registerForm.get('role')?.touched">
+                <option value="volunteer">Volunteer</option>
+                <option value="ngo">NGO</option>
+              </select>
+
+              <button type="button" class="btn-primary" (click)="onRegister()">Create Account</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showOtpModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Verify Your Request</h3>
+      <p>An OTP has been sent to your registered email. Please enter it below to confirm your registration.</p>
+    </div>
+    <div class="modal-body">
+      <label>Enter OTP</label>
+      <input type="text" [(ngModel)]="otpValue" placeholder="e.g., 123456">
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="closeOtpModal()">Close</button>
+      <button type="button" class="btn-primary" (click)="submitRegistrationOtp()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<button
+  type="button"
+  class="theme-toggle-fab"
+  (click)="toggleTheme()"
+  [attr.aria-pressed]="isDarkMode()"
+  aria-label="Toggle dark mode"
+  title="Toggle dark mode">
+  <span class="material-symbols-outlined">{{ isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
+</button>

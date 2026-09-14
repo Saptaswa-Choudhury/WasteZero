@@ -1,0 +1,31 @@
+{
+  "name": "internship-wastmanagement-system",
+  "version": "1.0.0",
+  "description": "Backend API for the Infosys Springboard 7.0 Virtual Internship.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.3",
+    "nodemailer": "^9.0.3",
+    "pdfkit": "^0.19.1",
+    "socket.io": "^4.8.3",
+    "winston": "^3.19.0"
+  }
+}

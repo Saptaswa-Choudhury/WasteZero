@@ -1,0 +1,22 @@
+<div class="city-autocomplete">
+  <input
+    type="text"
+    [ngModel]="query"
+    (ngModelChange)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    [disabled]="disabled"
+    placeholder="Start typing your city..."
+    autocomplete="off" />
+
+  @if (isOpen) {
+    <ul class="suggestions">
+      @for (city of suggestions; track city.name) {
+        <li (mousedown)="selectCity(city)">
+          <span class="city-name">{{ city.name }}</span>
+          <span class="city-state">{{ city.state }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,150 @@
+<app-page-shell title="Settings" subtitle="Manage how WasteZero looks and notifies you">
+
+  <div class="settings-grid">
+
+    <section class="settings-card">
+      <div class="card-header">
+        <h2>Appearance</h2>
+        <p>Choose how WasteZero looks on this device</p>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">{{ isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
+          <div>
+            <span class="setting-title">Dark Mode</span>
+            <span class="setting-desc">Switch between light and dark theme</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="toggle-switch"
+          [class.on]="isDarkMode()"
+          (click)="toggleTheme()"
+          [attr.aria-pressed]="isDarkMode()"
+          aria-label="Toggle dark mode">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="card-header">
+        <h2>Notifications</h2>
+        <p>Control what WasteZero notifies you about</p>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">mail</span>
+          <div>
+            <span class="setting-title">Email Notifications</span>
+            <span class="setting-desc">Receive updates about your account via email</span>
+          </div>
+        </div>
+        <button type="button" class="toggle-switch" [class.on]="preferences.email"
+          (click)="togglePreference('email')" [attr.aria-pressed]="preferences.email" aria-label="Toggle email notifications">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">notifications</span>
+          <div>
+            <span class="setting-title">Push Notifications</span>
+            <span class="setting-desc">Get real-time alerts in your browser</span>
+          </div>
+        </div>
+        <button type="button" class="toggle-switch" [class.on]="preferences.push"
+          (click)="togglePreference('push')" [attr.aria-pressed]="preferences.push" aria-label="Toggle push notifications">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">calendar_today</span>
+          <div>
+            <span class="setting-title">Pickup Reminders</span>
+            <span class="setting-desc">Be reminded before a scheduled pickup</span>
+          </div>
+        </div>
+        <button type="button" class="toggle-switch" [class.on]="preferences.pickupReminders"
+          (click)="togglePreference('pickupReminders')" [attr.aria-pressed]="preferences.pickupReminders" aria-label="Toggle pickup reminders">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">eco</span>
+          <div>
+            <span class="setting-title">Opportunity Updates</span>
+            <span class="setting-desc">Hear about new volunteering opportunities near you</span>
+          </div>
+        </div>
+        <button type="button" class="toggle-switch" [class.on]="preferences.opportunityUpdates"
+          (click)="togglePreference('opportunityUpdates')" [attr.aria-pressed]="preferences.opportunityUpdates" aria-label="Toggle opportunity updates">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+
+      <div class="saved-toast" *ngIf="savedMessage">{{ savedMessage }}</div>
+    </section>
+
+    <section class="settings-card">
+      <div class="card-header">
+        <h2>Account</h2>
+        <p>Manage your account security and data</p>
+      </div>
+
+      <button type="button" class="link-row" (click)="goToChangePassword()">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon">lock</span>
+          <div>
+            <span class="setting-title">Change Password</span>
+            <span class="setting-desc">Update the password used to sign in</span>
+          </div>
+        </div>
+        <span class="material-symbols-outlined chevron">chevron_right</span>
+      </button>
+    </section>
+
+    <section class="settings-card danger-zone">
+      <div class="card-header">
+        <h2>Danger Zone</h2>
+        <p>Irreversible actions - proceed with caution</p>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="material-symbols-outlined setting-icon danger">delete_forever</span>
+          <div>
+            <span class="setting-title">Delete Account</span>
+            <span class="setting-desc">Permanently delete your account and all associated data</span>
+          </div>
+        </div>
+        <button type="button" class="btn-danger" (click)="openDeleteConfirm()">Delete Account</button>
+      </div>
+    </section>
+
+  </div>
+
+</app-page-shell>
+
+<div *ngIf="isDeleteConfirmOpen" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Delete your account?</h3>
+      <p>This will permanently delete your account, along with your profile, pickups, and messages. This action cannot be undone.</p>
+    </div>
+    <div class="modal-error" *ngIf="deleteError">{{ deleteError }}</div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="cancelDeleteConfirm()" [disabled]="isDeleting">Cancel</button>
+      <button type="button" class="btn-danger" (click)="confirmDeleteAccount()" [disabled]="isDeleting">
+        {{ isDeleting ? 'Deleting…' : 'Yes, delete my account' }}
+      </button>
+    </div>
+  </div>
+</div>
